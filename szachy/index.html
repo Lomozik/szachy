@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta author="Artur Łomozik">
+    <link rel="stylesheet" href="style.css">
+<title>szachy</title>
+</head>
+<body>
+    <center>
+
+        <p id="p">
+            <button onclick="zacznij()">Zacznij</button>
+        </p>
+        <p id=cos>
+            
+        </p>
+    </center>
+    <script>
+        class element_szachowy
+        {
+            constructor(startowe_pole, numer_pionka, kolor_pionka, czy_zbity)
+            {
+                this.akt_pole = startowe_pole;
+                this.numer = numer_pionka;
+                this.kolor = kolor_pionka;
+                this.stan = czy_zbity;
+            }
+            // miejsce()
+            // {
+            //     return this.aktualne_pole;
+            // }
+            // nazwa()
+            // {
+            //     return this.numer;
+            // }
+            // kolor()
+            // {
+            //     return this.kolor;
+            // }
+            // stan()
+            // {
+            //     return this.stan;
+            // }
+            zmiana_pola(pole)
+            {
+                this.akt_pole=pole;
+            }
+            zmiana_stanu(nowy_stan)
+            {
+                this.stan=nowy_stan;
+            }
+        }
+        // var pionek = new element_szachowy(8, 1, 1);
+
+
+        var p   = document.getElementById('p');
+        var cos = document.getElementById('cos');
+        var ruch_poczatek = -1;
+        var ruch_koniec   = -1;
+        var tablica_bialych = [];
+        var tablica_czarnych = [];
+        var tablica_pol = [];
+        var ruch_zaczety=false;
+        var tabela="";
+        
+        /*
+        numer figur
+        1 - pion
+        2 - wieża
+        3 - skoczek
+        4 - goniec
+        5 - hetman/królowa
+        6 - król
+        oznaczenie kolorów
+        -1 - biały
+        1 - czarny
+        */
+        //  var tablica_tworzaca_pole = [2,3,4,5,6,4,3,2,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,3,4,5,6,4,3,2];
+        // var tablica_pozycji_bialych  = [48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63];
+        // var tablica_pozycji_czarnych = [8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7];
+        function tworzenie_bialych()
+        {
+            let oznaczenie_pionka = 2;
+            let druga_strona = false;
+
+            for (let i = 0; i <8; i++) 
+            {
+                tablica_bialych.push(new element_szachowy(i+48, 1, -1, 0));
+                console.log(i+48+" 1");
+            }
+
+            for (let i = 0; i < 8; i++) 
+            {
+                if(oznaczenie_pionka<6 &&druga_strona==false)
+                {
+                    tablica_bialych.push(new element_szachowy(i+56,oznaczenie_pionka, -1, 0));
+                    // console.log(i+56+" "+oznaczenie_pionka+" "+druga_strona);
+                    oznaczenie_pionka++;
+                }
+                else if(oznaczenie_pionka==6 && druga_strona==false)
+                {
+                    tablica_bialych.push(new element_szachowy(i+56,oznaczenie_pionka, -1, 0));
+                    // console.log(i+56+" "+oznaczenie_pionka+" "+druga_strona);
+                    oznaczenie_pionka=4;
+                    druga_strona=true;
+                }
+                else if(oznaczenie_pionka<6 &&druga_strona==true)
+                {
+                    tablica_bialych.push(new element_szachowy(i+56 ,oznaczenie_pionka, -1, 0));
+                    // console.log(i+56+" "+oznaczenie_pionka+" "+druga_strona);
+                    oznaczenie_pionka--;
+                }
+                else
+                {
+                    console.log("Error: tworznie białych"+ i + " " + oznaczenie_pionka + " " + druga_strona + " !!")
+                }
+            }
+           console.log("Białe skończone");
+        }
+        
+        function tworzenie_czarnych()
+        {
+            let oznaczenie_pionka = 2;
+            let druga_strona = false;
+            
+            for (let j = 8; j <= 15; j++) 
+            {
+                tablica_czarnych.push(new element_szachowy(j, 1, 1, 0));
+                console.log("Tworznie czarnych "+ j + " 1 ")
+                
+            }
+            
+            for (let i = 0; i <= 9; i++) 
+            {
+                if(oznaczenie_pionka<6 &&druga_strona==false)
+                {
+                    tablica_czarnych.push(new element_szachowy(i, oznaczenie_pionka, 1, 0));
+                    oznaczenie_pionka++;
+                }
+                else if(oznaczenie_pionka==6 && druga_strona==false)
+                {
+                    tablica_czarnych.push(new element_szachowy(i, oznaczenie_pionka, 1, 0));
+                    oznaczenie_pionka=4;
+                    druga_strona=true;
+                }
+                else if(oznaczenie_pionka<6 &&druga_strona==true)
+                {
+                    tablica_czarnych.push(new element_szachowy(i, oznaczenie_pionka, 1, 0));
+                    oznaczenie_pionka--;
+                }
+                else
+                {
+                    console.log("Error: tworznie czarnych"+ i + " " + oznaczenie_pionka + " " + druga_strona + " !!")
+                }
+            }
+            
+            console.log("Czarne skończone");
+        }
+        
+        function tablice_bc_na_tablice_pola()
+        {
+            console.log("Łączenie...");
+            for (let i = -1; i < 16; i++) 
+            {
+                for (let j = 0; j < 64; j++) 
+                {
+                    if(tablica_pol[j]==undefined)
+                    {
+                        tablica_pol[j]=new element_szachowy(null ,null,null,null);
+                        // console.log("Tabela puste: "+ i +" " + j);
+                    }
+                    else if(tablica_bialych[i].akt_pole==j)
+                    {
+                        tablica_pol[j]=tablica_bialych[i];
+                        console.log("Tabela białych: "+ i+" "+j+" "+ tablica_bialych[i].numer);
+                    }
+                    else if(tablica_czarnych[i].akt_pole==j)
+                    {
+                        tablica_pol[j]=tablica_czarnych[i];
+                        console.log("Tabela czarnych: "+ i+" "+j+ " "+ tablica_czarnych[i].numer);
+                    }
+                }
+            }
+            console.log("Łączenie skończone");
+        }
+
+        function aktualizacja_tablicy_pol()
+        {
+            for (let i = 0; i < 64; i++) 
+            {
+                if(tablica_pol[i].akt_pole!=i)
+                {
+                    tablica_pol[tablica_pol[i].akt_pole]=tablica_pol[i];
+                    tablica_pol[i]=new element_szachowy(null,null,null,null);
+                }
+                
+            }
+        }
+
+        function ruch(pole)
+        {
+            // if(ruch_poczatek==-1&&tablica_tworzaca_pole[pole]!=0)
+            // ruch_poczatek=pole;
+            
+            if(ruch_zaczety==true)
+            {
+
+                // cos.innerHTML+="Ruch "+ tablica_pol[ruch_poczatek].numer+" z "+ ruch_poczatek+" na "+ pole+"<br>\n";
+                // console.log("Kończenie ruchu z "+ ruch_poczatek+" na "+ pole);
+                // tablica_pol[ruch_poczatek].zmiana_pola(pole);
+                var x = Math.abs(tablica_pol[ruch_poczatek].akt_pole-pole);
+                var y = (tablica_pol[ruch_poczatek].akt_pole-pole)*tablica_pol[ruch_poczatek].kolor*-1;
+                // console.log(x)
+                
+                switch(tablica_pol[ruch_poczatek].numer)
+                {
+                    case 1:
+                        if(y==8)
+                        {
+                            tablica_pol[ruch_poczatek].zmiana_pola(pole);
+                        }
+                        else
+                        {
+                            if(tablica_pol[ruch_poczatek].akt_pole < 16 || tablica_pol[ruch_poczatek].akt_pole > 47)
+                            {
+                                if(y==16)
+                                {
+                                tablica_pol[ruch_poczatek].zmiana_pola(pole);
+                                }
+                            }
+                        }
+                        break;
+                    case 2:
+                    console.log(ruch_poczatek%8)
+                        if((x< ruch_poczatek%8 && x > 8-ruch_poczatek%8) || (x > ruch_poczatek%8 && x < 8-ruch_poczatek%8) || x%8==0)
+                        {
+                            console.log("OK")
+                            tablica_pol[ruch_poczatek].zmiana_pola(pole);
+                        }
+                        break;
+                    case 3:
+                        if(x==15 || x==17 || x==10 || x==6)
+                        {
+                            tablica_pol[ruch_poczatek].zmiana_pola(pole);
+                        }
+                        break;
+                    case 4:
+                        if(x%7==0 || x%9==0)
+                        {
+                            tablica_pol[ruch_poczatek].zmiana_pola(pole);
+                        }
+                        break;
+                    case 5:
+                        if(x<9 || x%8==0 || x%7==0 || x%9==0)
+                        {
+                            tablica_pol[ruch_poczatek].zmiana_pola(pole);
+                        }
+                        break;
+                    case 6:
+                        if(x==8 || x==1 || x==7 || x==9)
+                        {
+                            tablica_pol[ruch_poczatek].zmiana_pola(pole);
+                        }
+                        break;
+                }
+
+                ruch_zaczety=false;
+                ruch_poczatek=-1;
+
+                aktualizacja_tablicy_pol();
+                rysuj_plansze();
+            }
+            else
+            {
+                if(tablica_pol[pole].numer!=null)
+                {
+                    ruch_poczatek=pole;
+                    ruch_zaczety=true;
+                }
+            }
+           
+        }
+
+        function rysuj_plansze()
+        {
+            console.log("Początek rysowania planszy");
+            tabela="<table>";
+            var pozycja=0;
+            for (let i = 0; i < 4; i++) 
+            {
+                // tabela+="<tr><td id=\"b\">c1</td><td id=\"c\">c2</td></tr>";    
+                    tabela+="<tr>";
+                        for (let j = 0; j < 4; j++) {
+                            
+                            // tabela+="<td class=biale_pola  id="+pozycja+" onclick=ruch("+pozycja+")><img src=" + tablica_pol[pozycja].numer + ".png></td>";
+                            tabela+="<td class=biale_pola id="+pozycja+" onclick=ruch("+pozycja+")><img src='" + tablica_pol[pozycja].numer +tablica_pol[pozycja].kolor+ ".png'></td>";
+                            pozycja++;
+                            // tabela+="<td class=czarne_pola id="+pozycja+" onclick=ruch("+pozycja+")>" + tablica_pol[pozycja].numer + "</td>";
+                            tabela+="<td class=czarne_pola  id="+pozycja+" onclick=ruch("+pozycja+")><img src='" + tablica_pol[pozycja].numer +tablica_pol[pozycja].kolor+ ".png'></td>";
+                            pozycja++;
+                        }
+                        tabela+="</tr>";
+                        // pozycja+=2;
+                        tabela+="<tr>";
+                            for (let j = 0; j < 4; j++) {
+                            tabela+="<td class=czarne_pola  id="+pozycja+" onclick=ruch("+pozycja+")><img src='" + tablica_pol[pozycja].numer +tablica_pol[pozycja].kolor+ ".png'></td>";
+                            // tabela+="<td class=czarne_pola id="+pozycja+" onclick=ruch("+pozycja+")>"+ tablica_pol[pozycja].numer +"</td>";
+                            pozycja++;
+                            tabela+="<td class=biale_pola  id="+pozycja+" onclick=ruch("+pozycja+")><img src='" + tablica_pol[pozycja].numer +tablica_pol[pozycja].kolor+ ".png'</td>";
+                            // tabela+="<td class=biale_pola  id="+pozycja+" onclick=ruch("+pozycja+")>"+ tablica_pol[pozycja].numer +"</td>";
+                            pozycja++;
+                        }
+                    // pozycja+=2;
+                    tabela+="</tr>";
+                    
+            }
+            p.innerHTML=tabela;
+            console.log("Koniec rysowania planszy");
+        }
+
+        function zacznij()
+        {
+            
+            p.innerHTML="";
+            tworzenie_bialych();
+            tworzenie_czarnych();
+            tablice_bc_na_tablice_pola();
+            rysuj_plansze();
+            
+            // tabela+="</table>";
+            
+        }
+        </script>
+       
+</body>
+</html>
